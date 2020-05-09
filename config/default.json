@@ -1,0 +1,11 @@
+{
+  "Customer": {
+    "dbConfig": {
+      "host": "192.168.3.17",
+      "user": "bot_telegram",
+      "password": "=4mA#QySf`#Q2=N",
+      "database": "bot_rent"
+    },
+    "TelegramToken": "1135035856:AAFtD7ddczOr9gSzrUn49eFsRkTaA01uLDk"
+  }
+}
