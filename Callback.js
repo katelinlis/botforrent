@@ -1,4 +1,5 @@
 var menuObject = require("./menu/index");
+var users = require("./db/tables/users");
 var optionsMenu = {
   reply_markup: JSON.stringify({
     inline_keyboard: [
@@ -12,6 +13,12 @@ var optionsMenu = {
 
 exports.Commands = (bot) => {
   bot.onText(/\/start/, (msg) => {
+    users.RegisterUser(
+      msg.from.first_name,
+      msg.from.last_name,
+      msg.from.username,
+      msg.from.id
+    );
     var options = {};
     bot.sendMessage(
       msg.chat.id,
@@ -20,7 +27,17 @@ exports.Commands = (bot) => {
     bot.sendMessage(msg.chat.id, "Давай приступим", optionsMenu);
   });
   bot.onText(/\/menu/, (msg) => {
-    bot.sendMessage(msg.chat.id, menuObject.menu.text, optionsMenu);
+    users.RegisterUser(
+      msg.from.first_name,
+      msg.from.last_name,
+      msg.from.username,
+      msg.from.id
+    );
+    bot.sendMessage(
+      msg.chat.id,
+      "Привет! я помогу тебе найти жилье, или найти арендаторов.",
+      optionsMenu
+    );
   });
 };
 
