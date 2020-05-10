@@ -43,8 +43,6 @@ exports.Commands = (bot) => {
 
 exports.Callback = (bot) => {
   bot.on("message", (msg) => {
-    console.log(msg);
-
     //menuObject.MonitoringMessages[msg.from.id];
 
     let opts = {
@@ -55,8 +53,8 @@ exports.Callback = (bot) => {
 
     menuObject.CreateRentParamsSubmit(
       menuObject.MonitoringMessages[msg.from.id],
-      opts,
-      bot
+      bot,
+      opts
     );
   });
   bot.on("callback_query", function onCallbackQuery(callbackQuery) {
@@ -66,8 +64,7 @@ exports.Callback = (bot) => {
       chat_id: msg.chat.id,
       message_id: msg.message_id,
     };
-    console.log(action);
-
+    menuObject.MenuUsersID[opts.chat_id] = opts.message_id;
     switch (action) {
       case "menu":
         menuObject.MonitoringMessages[opts.chat_id] = action;

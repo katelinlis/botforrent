@@ -62,11 +62,10 @@ exports.CreateRent = (action, opts, bot) => {
     case "CreateRentWriteFloor":
       CreateRent.CreateRentWriteFloor(bot, opts);
       break;
-    case "SendRentObject":
-      CreateRent.SendRentObject(bot, opts);
+    case "CreateRentSetLocation":
+      CreateRent.CreateRentSetLocation(bot, opts);
       break;
     default:
-      console.log("paramsSubmit");
       CreateRent.ParamsSubmit(action, bot, opts);
       break;
   }

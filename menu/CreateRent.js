@@ -6,8 +6,12 @@ exports.Selected = {
   101012: { TypeSelect: "TypeSet1", TypeSelect2: "TypeSet1" },
 };
 exports.SetStatusOfSelect = (number, Param, Value) => {
-  this.Selected[number] = {};
-  this.Selected[number][Param] = Value;
+  if (this.Selected[number]) {
+    this.Selected[number][Param] = Value;
+  } else {
+    this.Selected[number] = {};
+    this.Selected[number][Param] = Value;
+  }
 };
 exports.getStatusOfSelect = (number, Param) => {
   if (this.Selected[number] && this.Selected[number][Param])
@@ -16,10 +20,11 @@ exports.getStatusOfSelect = (number, Param) => {
 };
 
 exports.getStatusOfSelectValue = (number, Param, Value) => {
-  if (this.Selected[number] && this.Selected[number][Param])
+  if (this.Selected[number] && this.Selected[number][Param]) {
     if (this.Selected[number][Param] === Value) {
-      return "✔️";
-    }
+      return Value + " ✔️";
+    } else return Value;
+  } else return Value;
 };
 
 exports.ParamsSubmit = (action, bot, opts) => {
@@ -30,7 +35,6 @@ exports.ParamsSubmit = (action, bot, opts) => {
     action === "Дом"
   ) {
     this.SetStatusOfSelect(opts.chat_id, "TypeSelect", action);
-    console.log(this.Selected);
     this.CreateRent(bot, opts);
   } else {
     //Todo релизовать на уровне Menu проверку на открытие пункт меню и начать отслеживать нужный вариант ответа
@@ -42,13 +46,14 @@ exports.ParamsSubmit = (action, bot, opts) => {
         break;
       case "CreateRentSetLocation":
         //Todo учитывать location
-
+        console.log(opts);
         this.SetStatusOfSelect(opts.chat_id, "Location", opts.msg);
         this.CreateRent(bot, opts);
         break;
       case "CreateRentWriteFloor":
         //Вид ответа 0-999
-        this.SetStatusOfSelect(opts.chat_id, "Floor", msg.opts);
+        console.log(action);
+        this.SetStatusOfSelect(opts.chat_id, "Floor", opts.msg);
         this.CreateRent(bot, opts);
         break;
       case "CreateRentUploadPhoto":
@@ -61,7 +66,6 @@ exports.ParamsSubmit = (action, bot, opts) => {
 };
 
 exports.CreateRent = (bot, opts) => {
-  console.log("dd");
   text = "Поиск жилья, параметры";
   opts.reply_markup = JSON.stringify({
     inline_keyboard: [
@@ -72,9 +76,25 @@ exports.CreateRent = (bot, opts) => {
           callback_data: "CreateRentSetType",
         },
       ],
-      [{ text: "Стоимость", callback_data: "CreateRentSetPrice" }],
-      [{ text: "Местоположение", callback_data: "CreateRentSetLocation" }],
-      [{ text: "Этажность", callback_data: "CreateRentWriteFloor" }],
+      [
+        {
+          text: "Стоимость" + this.getStatusOfSelect(opts.chat_id, "Price"),
+          callback_data: "CreateRentSetPrice",
+        },
+      ],
+      [
+        {
+          text:
+            "Местоположение" + this.getStatusOfSelect(opts.chat_id, "Location"),
+          callback_data: "CreateRentSetLocation",
+        },
+      ],
+      [
+        {
+          text: "Этажность" + this.getStatusOfSelect(opts.chat_id, "Floor"),
+          callback_data: "CreateRentWriteFloor",
+        },
+      ],
       [{ text: "Фотография", callback_data: "CreateRentUploadPhoto" }],
       [{ text: "Создать", callback_data: "CreateRentDone" }],
       [{ text: "Назад", callback_data: "menu" }],
@@ -89,11 +109,43 @@ exports.CreateRentSetType = (bot, opts) => {
   text = "выберите тип";
   opts.reply_markup = JSON.stringify({
     inline_keyboard: [
-      [{ text: "Комната", callback_data: "Комната" }],
-      [{ text: "Квартира", callback_data: "Квартира" }],
-      [{ text: "Аппартаменты", callback_data: "Аппартаменты" }],
-      [{ text: "Дом", callback_data: "Дом" }],
-      [{ text: "Назад", callback_data: "FindRent" }],
+      [
+        {
+          text: this.getStatusOfSelectValue(
+            opts.chat_id,
+            "TypeSelect",
+            "Комната"
+          ),
+          callback_data: "Комната",
+        },
+      ],
+      [
+        {
+          text: this.getStatusOfSelectValue(
+            opts.chat_id,
+            "TypeSelect",
+            "Квартира"
+          ),
+          callback_data: "Квартира",
+        },
+      ],
+      [
+        {
+          text: this.getStatusOfSelectValue(
+            opts.chat_id,
+            "TypeSelect",
+            "Аппартаменты"
+          ),
+          callback_data: "Аппартаменты",
+        },
+      ],
+      [
+        {
+          text: this.getStatusOfSelectValue(opts.chat_id, "TypeSelect", "Дом"),
+          callback_data: "Дом",
+        },
+      ],
+      [{ text: "Назад", callback_data: "CreateRent" }],
     ],
   });
   bot.editMessageText(text, opts);
@@ -102,7 +154,7 @@ exports.CreateRentSetType = (bot, opts) => {
 exports.CreateRentSetPrice = (bot, opts) => {
   text = "Введите сумму или 10000-20000";
   opts.reply_markup = JSON.stringify({
-    inline_keyboard: [[{ text: "Назад", callback_data: "FindRent" }]],
+    inline_keyboard: [[{ text: "Назад", callback_data: "CreateRent" }]],
   });
   bot.editMessageText(text, opts);
 };
@@ -110,7 +162,7 @@ exports.CreateRentSetPrice = (bot, opts) => {
 exports.CreateRentSetLocation = (bot, opts) => {
   text = "Введите адрес или отправьте локацию где вас интересует жилье";
   opts.reply_markup = JSON.stringify({
-    inline_keyboard: [[{ text: "Назад", callback_data: "FindRent" }]],
+    inline_keyboard: [[{ text: "Назад", callback_data: "CreateRent" }]],
   });
   bot.editMessageText(text, opts);
 };
@@ -121,7 +173,7 @@ exports.CreateRentWriteFloor = (bot, opts) => {
     inline_keyboard: [
       [{ text: "Не минимальный этаж", callback_data: "RentNotFirstFloor" }],
       [{ text: "Не последний этаж", callback_data: "RentNotEndFloor" }],
-      [{ text: "Назад", callback_data: "FindRent" }],
+      [{ text: "Назад", callback_data: "CreateRent" }],
     ],
   });
   bot.editMessageText(text, opts);
