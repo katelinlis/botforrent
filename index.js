@@ -15,7 +15,3 @@ var Callback = require("./Callback");
 
 Callback.Commands(bot);
 Callback.Callback(bot);
-
-bot.on("message", (msg) => {
-  console.log(msg);
-});

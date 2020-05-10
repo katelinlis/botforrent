@@ -42,6 +42,23 @@ exports.Commands = (bot) => {
 };
 
 exports.Callback = (bot) => {
+  bot.on("message", (msg) => {
+    console.log(msg);
+
+    //menuObject.MonitoringMessages[msg.from.id];
+
+    let opts = {
+      chat_id: msg.from.id,
+      message_id: menuObject.MenuUsersID[msg.from.id],
+      msg: msg.text,
+    };
+
+    menuObject.CreateRentParamsSubmit(
+      menuObject.MonitoringMessages[msg.from.id],
+      opts,
+      bot
+    );
+  });
   bot.on("callback_query", function onCallbackQuery(callbackQuery) {
     const action = callbackQuery.data;
     const msg = callbackQuery.message;
@@ -49,17 +66,20 @@ exports.Callback = (bot) => {
       chat_id: msg.chat.id,
       message_id: msg.message_id,
     };
-    let text;
+    console.log(action);
 
     switch (action) {
       case "menu":
-        bot.sendMessage(msg.chat.id, "Меню", optionsMenu);
+        menuObject.MonitoringMessages[opts.chat_id] = action;
+        opts.reply_markup = optionsMenu.reply_markup;
+        bot.editMessageText("Меню", opts);
         break;
       default:
         menuObject.Rent(action, opts, bot);
         menuObject.Support(action, opts, bot);
         menuObject.CreateRent(action, opts, bot);
         menuObject.Language(action, opts, bot);
+
         //menuObject.CreateRent(action, opts, bot);
         //menuObject.Rent(action, opts, bot);
         //menuObject.Rent(action, opts, bot);
